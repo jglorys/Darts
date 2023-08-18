@@ -8,20 +8,70 @@
         <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 
         <style>
+            .table td,tr {
+                text-align: center !important;
+                vertical-align : middle !important;
+            }
+
+            .funcBtn1 {
+                background-color: aquamarine;
+                width: 120px;
+            }
+
+            .funcBtn1:hover {
+                background-color: #FFD700; /* 원하는 배경색으로 변경 */
+                color: #FFF; /* 텍스트 색 변경 (예: 흰색) */
+                border-color: #FFD700; /* 테두리 색 변경 */
+            }
+
+            .funcBtn2 {
+                background-color: transparent;
+                margin: 4px;
+            }
+
+            .funcBtn2:hover {
+                background-color: dimgrey; /* 원하는 배경색으로 변경 */
+                /*color: #FFF; !* 텍스트 색 변경 (예: 흰색) *!*/
+                border-color: dimgrey; /* 테두리 색 변경 */
+            }
+
+            input[type="number"].form-control{
+                /*width: 50% !important;*/
+                margin-bottom: 10px !important;
+                padding: 0 !important;
+            }
+
+            .inningTotal, .fullTotal {
+                border-color: transparent;
+                background-color: transparent;
+                outline: none; /* 테두리 제거 */
+                max-width: 100%;
+            }
         </style>
     </head>
 
     <body>
-        <div class="bg-dark col-12" style="height: 900px;">
-            <section class="bg-black col-12 d-flex justify-content-center" style="height: 50%">
-                <div class="m-4 col-11" style="height: 70%; background-color: antiquewhite">
-                    <table id="dartsTable">
+        <div class="col-12" style="height: 900px;">
+            <section class="col-12 d-flex justify-content-center align-items-center">
+                <div class="col-6 p-2" style="height: 90%; background-color: lightgrey">
+                    <div class="d-flex mb-2 align-items-center justify-content-between">
+                        <h4 class="">점수 올리기</h4>
+                        <div>
+                            <button class="btn funcBtn1" onclick="reload()">CLEAR</button>
+                            <button class="btn funcBtn1" onclick="addPlayer()">PLAYER +</button>
+                        </div>
+                    </div>
+                    <table id="dartsTable" class="table table-bordered table-hover" style="table-layout: fixed !important;">
+                        <thead>
+                        </thead>
+                        <tbody>
+                        </tbody>
                     </table>
                 </div>
-            </section>
+                <div class="col-6 p-2" style="height: 90%; background-color: lightgrey">
+                    <div class="d-flex justify-content-center align-items-center">
 
-            <section class="bg-primary col-12 d-flex justify-content-center" style="height: 50%">
-                <div class="bg-danger m-4 col-10" style="height: 50%">
+                    </div>
 
                 </div>
             </section>
@@ -29,12 +79,12 @@
     </body>
     <script>
         let dartsTable;
+        let playerName = 'PLAYER ';
+
         $(document).ready(function(e) {
             dartsTable = $('#dartsTable').DataTable({
-                "dom": "<'row'<'col-sm-12'f>>t<'row'<'col-sm-12'p>>", //Bfrtip
+                "dom": "t",
                 "lengthChange": false,
-                "pageLength": 3,
-                "paging": true,
                 "bDestroy": true,
                 "processing": true,
                 "info": false,
@@ -47,45 +97,127 @@
                 "data": [],
                 "columns": [
                     {
-                        "name" : "blackno" ,
-                        "title": "<span>No</span>",
-                        "width": "100px",
-                        "data": "blackno"
-                    },
-                    {
-                        "name" : "name" ,
-                        "title": "<span data-lang='objectAddress'></span>", //객체주소
-                        "width": "200px",
-                        "data": "name"
-                    },
-                    {
-                        "name" : "context" ,
-                        "title": "<span data-lang='objectName'></span>", //객체명
-                        "width": "200px",
-                        "data": "context"
-                    },
-                    {
-                        "name" : "useYn" ,
-                        "title": "<span data-lang='usageStatus'></span>", //사용여부
-                        "width": "100px",
-                        "data": "useYn"
-                    },
-                    {
-                        "name" : "contents" ,
-                        "title": "<span data-lang='notetable'></span>", //비고
-                        "width": "60px",
-                        "data": "contents",
-                        "render": function(data, type, row) {
-                            if (row.contents.trim() == "") {
-                                data = "";
-                            } else {
-                                data = "<input type='button' class='btn btn-info-css' data-toggle='tooltip' data-lang='notetable' title='"+ row.contents +"'>";
-                            }
+                        "name" : "userNo"
+                        , "title": "PLAYER NO"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row, meta) {
+                            // if (meta.row == 0) {
+                                data =  playerName + (meta.row + 1);
+                            // } else {
+                            //     data = playerName + (meta.row + 1) + "<br><button class='btn funcBtn2' onclick='removeRow()'>X</button>";
+                            // }
                             return data;
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "1"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "2"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "3"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "4"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "5"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "6"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "7"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "8"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
+                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        }
+                    }
+                    , {
+                        "class": ""
+                        , "title": "TOTAL"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return "<input type='number' class='fullTotal' readonly>";
                         }
                     }
                 ]
             });
+
+            // dartsTable.clear();
+            for (let i = 0; i < 2; i++) {
+                dartsTable.row.add({});
+            }
+            dartsTable.draw();
         });
+
+        function addPlayer() {
+            dartsTable.row.add({});
+            dartsTable.draw();
+        }
+
+        function reload() {
+            location.reload();
+        }
+
+
     </script>
 </html>
