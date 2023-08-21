@@ -80,6 +80,9 @@
     <script>
         let dartsTable;
         let playerName = 'PLAYER ';
+        const inningBoxHtml = "<input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='1'><input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='2'>" +
+            "<input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='3'><input type='number' class='inningTotal' readonly>";
+        const initialMemberCnt = 3;
 
         $(document).ready(function(e) {
             dartsTable = $('#dartsTable').DataTable({
@@ -115,9 +118,12 @@
                         , "title": "1"
                         , "width": ""
                         , "data": null
-                        , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        , "render": function(data, type, row, meta) {
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -125,9 +131,12 @@
                         , "title": "2"
                         , "width": ""
                         , "data": null
-                        , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                        , "render": function(data, type, row, meta) {
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -136,8 +145,11 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -146,8 +158,11 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -156,8 +171,11 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -166,8 +184,11 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -176,8 +197,11 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -186,8 +210,11 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='number' class='form-control'><input type='number' class='form-control'>" +
-                                "<input type='number' class='form-control'><input type='number' class='inningTotal' readonly>";
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
                         }
                     }
                     , {
@@ -203,7 +230,7 @@
             });
 
             // dartsTable.clear();
-            for (let i = 0; i < 2; i++) {
+            for (let i = 0 ; i < initialMemberCnt ; i++) {
                 dartsTable.row.add({});
             }
             dartsTable.draw();
@@ -212,12 +239,43 @@
         function addPlayer() {
             dartsTable.row.add({});
             dartsTable.draw();
+            //ella : 하나라도 게임 진행중이면 안된다고 띄우기
         }
 
         function reload() {
+            if (confirm("초기화 하시겠습니까?") == false) return false;
             location.reload();
         }
 
+        function moveFocusNext() {
+            var focusedElement = document.activeElement;
+            let boxRow = focusedElement.parentElement.getAttribute("box-row");
+            let boxCol = focusedElement.parentElement.getAttribute("box-col");
+            // console.log("R : " + boxRow + " / C : " + boxCol);
+
+            let nextRow = boxRow;
+            let nextCol = boxCol;
+            let nextDetail = parseInt(focusedElement.getAttribute("box-detail")) + 1;
+            if (focusedElement.getAttribute("box-detail") == '3') {
+                // 다음 칸으로 넘어감
+                if (boxRow == $('#dartsTable').DataTable().data().count()) {
+                    // 다음 이닝으로 넘어감 -> player1
+                    nextRow = 1;
+                    nextCol = parseInt(boxCol) + 1;
+                    nextDetail = 1;
+                } else {
+                    nextRow = parseInt(boxRow) + 1;
+                    nextDetail = 1;
+                }
+            }
+            $("[box-row='"+nextRow+"'][box-col='"+nextCol+"']").find("[box-detail='"+nextDetail+"']").focus();
+        }
+
+        function codeEnterkey() {
+            if (window.event.keyCode == 13) {
+                moveFocusNext();
+            }
+        }
 
     </script>
 </html>
