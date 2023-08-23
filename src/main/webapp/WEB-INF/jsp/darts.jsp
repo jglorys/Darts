@@ -8,20 +8,26 @@
         <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 
         <style>
+            .table {
+                border-color: transparent !important;
+            }
             .table td,tr {
                 text-align: center !important;
                 vertical-align : middle !important;
             }
-
+            .table th {
+                border-color: transparent !important;
+                background-color: darkseagreen !important;
+            }
             .funcBtn1 {
-                background-color: aquamarine;
+                background-color: darksalmon;
                 width: 120px;
             }
 
             .funcBtn1:hover {
-                background-color: #FFD700; /* 원하는 배경색으로 변경 */
+                background-color: darkseagreen; /* 원하는 배경색으로 변경 */
                 color: #FFF; /* 텍스트 색 변경 (예: 흰색) */
-                border-color: #FFD700; /* 테두리 색 변경 */
+                border-color: darkseagreen; /* 테두리 색 변경 */
             }
 
             .funcBtn2 {
@@ -36,7 +42,6 @@
             }
 
             input[type="number"].form-control{
-
                 /*width: 50% !important;*/
                 margin-bottom: 10px !important;
                 font-size: small;
@@ -57,6 +62,20 @@
                 text-align: center;
                 font-weight: bold;
             }
+            .blink {
+                background-color: initial; /* 기존 배경색 설정 제거 */
+                animation: background-blink 2s ease-in-out infinite alternate;
+            }
+
+            @keyframes background-blink {
+                0%, 100% {
+                    background-color: transparent; /* 배경색 없음 */
+                }
+                50% {
+                    background-color: darksalmon; /* 원하는 배경색 */
+                }
+            }
+
         </style>
         <title>Dartboard</title>
     </head>
@@ -387,6 +406,7 @@
             getCenterCoordinates("InnerRed");
             console.log('>>>' + mX + " / " + mY);
             $("[box-row='1'][box-col='1']").find("[box-detail='1']").focus();
+            $("[box-row='1'][box-col='1']").addClass("blink");
         });
 
         function addPlayer() {
@@ -411,27 +431,31 @@
             location.reload();
         }
 
-        function moveFocusNext(boxRow, boxCol, detail) {
-            let nextRow = boxRow;
-            let nextCol = boxCol;
-            let nextDetail = parseInt(detail) + 1;
-            if (detail == '3') {
+        function moveFocusTurnNext(nowRow, nowCol, nowDetail) {
+            let nextRow = nowRow;
+            let nextCol = nowCol;
+            let nextDetail = parseInt(nowDetail) + 1;
+            if (nowDetail == '3') {
                 // 다음 칸으로 넘어감
-                if (boxRow == $('#dartsTable').DataTable().data().count()) {
+                if (nowRow == $('#dartsTable').DataTable().data().count()) {
                     // 다음 이닝으로 넘어감 -> player1
                     nextRow = 1;
-                    nextCol = parseInt(boxCol) + 1;
+                    nextCol = parseInt(nowCol) + 1;
                     nextDetail = 1;
                 } else {
-                    nextRow = parseInt(boxRow) + 1;
+                    nextRow = parseInt(nowRow) + 1;
                     nextDetail = 1;
                 }
             }
+            $("[box-row='"+nowRow+"'][box-col='"+nowCol+"']").removeClass("blink");
+            $("[box-row='"+nextRow+"'][box-col='"+nextCol+"']").addClass("blink");
+
+            $("[box-row='"+nowRow+"'][box-col='"+nowCol+"']").find("[box-detail='"+nowDetail+"']").attr("disabled", "true");
+
             $("[box-row='"+nextRow+"'][box-col='"+nextCol+"']").find("[box-detail='"+nextDetail+"']").focus();
             nextTurn.row = nextRow;
             nextTurn.col = nextCol;
             nextTurn.detail = nextDetail;
-            console.log(nextTurn);
         }
 
         function codeEnterkey() {
@@ -442,12 +466,14 @@
             // console.log("R : " + boxRow + " / C : " + boxCol);
 
             if (window.event.keyCode == 13) {
-                moveFocusNext(boxRow, boxCol, detail);
+                moveFocusTurnNext(boxRow, boxCol, detail);
             } else {
                 updateTotalBox(boxRow, boxCol);
+                $(".inning").removeClass("blink");
                 nextTurn.row = boxRow;
                 nextTurn.col = boxCol;
                 nextTurn.detail = detail;
+                $("[box-row='"+boxRow+"'][box-col='"+boxCol+"']").addClass("blink");
             }
         }
 
@@ -592,10 +618,8 @@
 
             // 값 넣기
             $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val(result);
-            // function updateTotalBox(boxRow, boxCol) {
             updateTotalBox(nextTurn.row, nextTurn.col);
-            // function moveFocusNext(boxRow, boxCol, detail)
-            moveFocusNext(nextTurn.row, nextTurn.col, nextTurn.detail);
+            moveFocusTurnNext(nextTurn.row, nextTurn.col, nextTurn.detail);
 
         }
 
