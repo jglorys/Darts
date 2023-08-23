@@ -78,19 +78,36 @@
                 border-color: var(--bs-border-color) !important;
                 box-shadow: 0 0 10px transparent;
             }
+
+            #body-wrapper {
+                height: 100%;
+                position: relative;
+            }
+
+            #body-content {
+                padding-bottom: 10%; /* footer의 높이 */
+            }
+
+            footer {
+                width: 100%;
+                height: 10%; /* footer의 높이 */
+                position: absolute;
+                bottom: 0;
+                left: 0;
+            }
         </style>
         <link rel="icon" href="img/logo/favicon.png"/>
         <title>Darts</title>
     </head>
 
     <body>
-        <div class="col-12 p-2" style="height: 900px;">
-            <section class="col-12 d-flex justify-content-center align-items-center">
+        <div class="col-12 p-2" id="body-wrapper">
+            <section id="body-content" class="col-12 d-flex justify-content-center align-items-center">
                 <div class="col-8">
                     <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
-                        <h4>Raise the score ☺︎</h4>
+                        <h4>Raise the score</h4>
                         <div>
-                            <button class="btn funcBtn1" onclick="reload()">RESET </button>
+                            <button class="btn funcBtn1" onclick="reload()">RESET</button>
                             <button class="btn funcBtn1" onclick="addPlayer()">PLAYER +</button>
                             <button class="btn funcBtn1" onclick="initializePrevScore()">DEL ⌫</button>
                         </div>
@@ -232,8 +249,10 @@
                             </g>
                         </g>
                     </svg>
-
                 </div>
+                <footer class="footer d-flex justify-content-center align-items-center">
+                    <p>Copyright 2023. ELLA. All rights reserved.</p>
+                </footer>
             </section>
         </div>
     </body>
