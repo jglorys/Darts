@@ -22,6 +22,7 @@
             .funcBtn1 {
                 background-color: darksalmon;
                 width: 120px;
+                border-radius: 0px !important;
             }
 
             .funcBtn1:hover {
@@ -30,23 +31,14 @@
                 border-color: darkseagreen; /* 테두리 색 변경 */
             }
 
-            .funcBtn2 {
-                background-color: transparent;
-                margin: 4px;
-            }
-
-            .funcBtn2:hover {
-                background-color: dimgrey; /* 원하는 배경색으로 변경 */
-                /*color: #FFF; !* 텍스트 색 변경 (예: 흰색) *!*/
-                border-color: dimgrey; /* 테두리 색 변경 */
-            }
-
             input[type="number"].form-control{
                 /*width: 50% !important;*/
                 margin-bottom: 10px !important;
                 font-size: small;
                 text-align: center;
+                border-radius: 0px !important;
             }
+            /*number 우측 증감소 버튼*/
             input[type="number"]::-webkit-outer-spin-button,
             input[type="number"]::-webkit-inner-spin-button {
                 -webkit-appearance: none;
@@ -69,26 +61,37 @@
 
             @keyframes background-blink {
                 0%, 100% {
-                    background-color: transparent; /* 배경색 없음 */
+                    background-color: transparent; /* 배경색 없음 - 클래스 안의 요소에는 투명으로 적용하지 X */
                 }
                 50% {
                     background-color: darksalmon; /* 원하는 배경색 */
                 }
             }
 
+            input[type="number"]:disabled {
+                background: darkgrey;
+                border: 0px !important;
+            }
+
+            input[type="number"]:focus {
+                outline: none !important;
+                border-color: var(--bs-border-color) !important;
+                box-shadow: 0 0 10px transparent;
+            }
         </style>
-        <title>Dartboard</title>
+        <title>Darts</title>
     </head>
 
     <body>
-        <div class="col-12" style="height: 900px;">
+        <div class="col-12 p-2" style="height: 900px;">
             <section class="col-12 d-flex justify-content-center align-items-center">
-                <div class="col-8 p-2" style="height: 90%;">
-                    <div class="d-flex mb-2 align-items-center justify-content-between">
-                        <h4 class="">점수 올리기</h4>
+                <div class="col-8">
+                    <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
+                        <h4>Raise the score</h4>
                         <div>
-                            <button class="btn funcBtn1" onclick="reload()">CLEAR</button>
+                            <button class="btn funcBtn1" onclick="reload()">RESET</button>
                             <button class="btn funcBtn1" onclick="addPlayer()">PLAYER +</button>
+                            <button class="btn funcBtn1" onclick="initializePrevScore()">DEL ⌫</button>
                         </div>
                     </div>
                     <table id="dartsTable" class="table table-bordered table-hover" style="table-layout: fixed !important;">
@@ -98,7 +101,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="col-4 p-2 ml-5" style="height: 90%;" id="svg">
+                <div class="col-4 d-flex justify-content-center" id="svg">
                     <svg width="455px" height="455px" viewBox="0 0 455 455" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                             <g id="dartboard">
@@ -413,8 +416,8 @@
             // 게임 진행중인 경우 추가 불가능
             let addAble = true;
             $(".fullTotal").each(function() {
-                if($(this).val()) {
-                    alert("게임 진행중에는 Player 추가가 불가능합니다!");
+                if(parseInt($(this).val()) > 0) {
+                    alert("Player cannot be added while the game is in progress!");
                     addAble = false;
                     return false;
                 }
@@ -422,16 +425,16 @@
             if (addAble) {
                 dartsTable.row.add({});
                 dartsTable.draw();
-
             }
+            getCenterCoordinates("InnerRed");
         }
 
         function reload() {
-            if (confirm("초기화 하시겠습니까?") == false) return false;
+            if (confirm("Do you want to reset?") == false) return false;
             location.reload();
         }
 
-        function moveFocusTurnNext(nowRow, nowCol, nowDetail) {
+        function updateFocusTurnNext(nowRow, nowCol, nowDetail) {
             let nextRow = nowRow;
             let nextCol = nowCol;
             let nextDetail = parseInt(nowDetail) + 1;
@@ -447,7 +450,7 @@
                     nextDetail = 1;
                 }
             }
-            $("[box-row='"+nowRow+"'][box-col='"+nowCol+"']").removeClass("blink");
+            $(".inning").removeClass("blink");
             $("[box-row='"+nextRow+"'][box-col='"+nextCol+"']").addClass("blink");
 
             $("[box-row='"+nowRow+"'][box-col='"+nowCol+"']").find("[box-detail='"+nowDetail+"']").attr("disabled", "true");
@@ -466,7 +469,7 @@
             // console.log("R : " + boxRow + " / C : " + boxCol);
 
             if (window.event.keyCode == 13) {
-                moveFocusTurnNext(boxRow, boxCol, detail);
+                updateFocusTurnNext(boxRow, boxCol, detail);
             } else {
                 updateTotalBox(boxRow, boxCol);
                 $(".inning").removeClass("blink");
@@ -496,7 +499,7 @@
                     total += value;
                 }
             });
-            console.log(total);
+            // console.log(total);
             parentEl.parent().find(".userTotal").find(".fullTotal").val(total);
         }
 
@@ -612,14 +615,14 @@
             // console.log(">>>>>> x: " + x + " / y: " + y );
             // console.log(result);
             if (result == NaN) {
-                alert("오류 발생!");
+                alert("ERROR!\nPlease contact ELLA~,,~");
                 return false;
             }
 
             // 값 넣기
             $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val(result);
             updateTotalBox(nextTurn.row, nextTurn.col);
-            moveFocusTurnNext(nextTurn.row, nextTurn.col, nextTurn.detail);
+            updateFocusTurnNext(nextTurn.row, nextTurn.col, nextTurn.detail);
 
         }
 
@@ -631,5 +634,39 @@
             mY = rect.top + rect.height / 2;
         }
 
+        function initializePrevScore() {
+            let prevRow = nextTurn.row;
+            let prevCol = nextTurn.col;
+            let prevDetail = parseInt(nextTurn.detail) - 1;
+            if (nextTurn.detail == '1') {
+                // 이전 순서 사람으로 넘어감
+                if (nextTurn.row == 1) {
+                    if (nextTurn.col == 1) {
+                        alert("Unable to delete!");
+                        return false;
+                    }
+                    // 다음 이닝으로 넘어간 상황
+                    prevRow = $('#dartsTable').DataTable().data().count();
+                    prevCol = prevCol - 1;
+                    prevDetail = 3;
+                } else {
+                    prevRow = nextTurn.row - 1;
+                    prevDetail = 3;
+                }
+            }
+            $(".inning").removeClass("blink");
+            $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").addClass("blink");
+
+            $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").find("[box-detail='"+prevDetail+"']").removeAttr("disabled");
+            $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").find("[box-detail='"+prevDetail+"']").val("");
+
+            $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").find("[box-detail='"+prevDetail+"']").focus();
+
+            updateTotalBox(nextTurn.row, nextTurn.col);
+            updateTotalBox(prevRow, prevCol);
+            nextTurn.row = prevRow;
+            nextTurn.col = prevCol;
+            nextTurn.detail = prevDetail;
+        }
     </script>
 </html>
