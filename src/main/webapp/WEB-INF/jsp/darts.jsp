@@ -107,7 +107,7 @@
             }
 
             ::-webkit-scrollbar-thumb:hover {
-                background-color: darkgrey; /* 스크롤바에 마우스 호버 시 색상 변경 */
+                background-color: #B5C99A; /* 스크롤바에 마우스 호버 시 색상 변경 */
             }
 
         </style>
@@ -627,7 +627,7 @@
             let result = null;
             if (id == 'InnerGreen' || id == 'InnerRed') {
                 result = 50;
-            } else if (pId == 'BaseBoard' || pId == 'svg') {
+            } else if (pId == 'BaseBoard' || pId == 'svg' || pId.startsWith('tspan')) {
                 result = 0;
             } else {
                 if (id == 'TrebleRed') {
@@ -635,7 +635,6 @@
                 } else if (id == 'DoubleRed') {
                     multiple = 2;
                 } else {
-
                     if (pId == 'GreenTrebleSpiders') {
                         multiple = 3;
                     } else if (pId == 'GreenDoubleSpiders') {
