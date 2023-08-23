@@ -79,6 +79,7 @@
                 box-shadow: 0 0 10px transparent;
             }
         </style>
+        <link rel="icon" href="img/logo/favicon.png"/>
         <title>Darts</title>
     </head>
 
@@ -87,9 +88,9 @@
             <section class="col-12 d-flex justify-content-center align-items-center">
                 <div class="col-8">
                     <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
-                        <h4>Raise the score</h4>
+                        <h4>Raise the score ☺︎</h4>
                         <div>
-                            <button class="btn funcBtn1" onclick="reload()">RESET</button>
+                            <button class="btn funcBtn1" onclick="reload()">RESET </button>
                             <button class="btn funcBtn1" onclick="addPlayer()">PLAYER +</button>
                             <button class="btn funcBtn1" onclick="initializePrevScore()">DEL ⌫</button>
                         </div>
