@@ -17,24 +17,25 @@
             }
             .table th {
                 border-color: transparent !important;
-                background-color: darkseagreen !important;
+                background-color: #FFF9C9 !important;
             }
             .funcBtn1 {
-                background-color: darksalmon;
+                background-color: #862B0D;
+                color: #ffffff;
                 width: 120px;
                 border-radius: 0px !important;
             }
 
             .funcBtn1:hover {
-                background-color: darkseagreen; /* 원하는 배경색으로 변경 */
-                color: #FFF; /* 텍스트 색 변경 (예: 흰색) */
-                border-color: darkseagreen; /* 테두리 색 변경 */
+                background-color: #FFF9C9; /* 원하는 배경색으로 변경 */
+                color: #000000;
+                border-color: #FFF9C9; /* 테두리 색 변경 */
             }
 
             input[type="number"].form-control{
                 /*width: 50% !important;*/
                 margin-bottom: 10px !important;
-                font-size: small;
+                /*font-size: small;*/
                 text-align: center;
                 border-radius: 0px !important;
             }
@@ -50,9 +51,10 @@
                 background-color: transparent;
                 outline: none; /* 테두리 제거 */
                 max-width: 100%;
-                font-size: medium;
+                font-size: large;
                 text-align: center;
                 font-weight: bold;
+                color: #862B0D;
             }
             .blink {
                 background-color: initial; /* 기존 배경색 설정 제거 */
@@ -64,12 +66,12 @@
                     background-color: transparent; /* 배경색 없음 - 클래스 안의 요소에는 투명으로 적용하지 X */
                 }
                 50% {
-                    background-color: darksalmon; /* 원하는 배경색 */
+                    background-color: #B5C99A; /* 원하는 배경색 */
                 }
             }
 
             input[type="number"]:disabled {
-                background: darkgrey;
+                background: transparent;
                 border: 0px !important;
             }
 
@@ -101,7 +103,7 @@
     </head>
 
     <body>
-        <div class="col-12 p-2" id="body-wrapper">
+        <div class="col-12 p-3" id="body-wrapper">
             <section id="body-content" class="col-12 d-flex justify-content-center align-items-center">
                 <div class="col-8">
                     <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
@@ -266,7 +268,6 @@
         // 다트 원점
         let mX = null;
         let mY = null;
-        let initialMxMySetting = false;
 
         // 게임 차례
         let nextTurn = {
@@ -509,18 +510,18 @@
                    sum += parseInt(parentEl.find("[box-detail='" + i + "']").val());
                }
             }
-            parentEl.find(".inningTotal").val(sum);
+            sum == 0 ? parentEl.find(".inningTotal").val("") : parentEl.find(".inningTotal").val(sum);
 
             // Total UPDATE
             var total = 0;
             $("[box-row='" + boxRow + "']").find(".inningTotal").each(function() {
-                var value = parseFloat($(this).val()); // input의 값을 숫자로 변환
+                var value = parseInt($(this).val()); // input의 값을 숫자로 변환
                 if (!isNaN(value)) { // 숫자인 경우에만 합산
                     total += value;
                 }
             });
-            // console.log(total);
-            parentEl.parent().find(".userTotal").find(".fullTotal").val(total);
+
+            total == 0 ? parentEl.parent().find(".userTotal").find(".fullTotal").val("") : parentEl.parent().find(".userTotal").find(".fullTotal").val(total);
         }
 
         function getScoreFromXY(x, y, multiple) {
