@@ -8,6 +8,8 @@
         <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 
         <style>
+            /*색상조합 링크*/
+            /*https://colorhunt.co/palette/b5c99a862b0dfff9c9ffc95f*/
             .table {
                 border-color: transparent !important;
             }
@@ -27,9 +29,9 @@
             }
 
             .funcBtn1:hover {
-                background-color: #FFF9C9; /* 원하는 배경색으로 변경 */
-                color: #000000;
-                border-color: #FFF9C9; /* 테두리 색 변경 */
+                background-color: transparent; /* 원하는 배경색으로 변경 */
+                color: #862B0D;
+                border-color: transparent; /* 테두리 색 변경 */
             }
 
             input[type="number"].form-control{
@@ -82,21 +84,32 @@
             }
 
             #body-wrapper {
-                height: 100%;
+                max-height: 100vh;
+                height: 100vh;
                 position: relative;
             }
-
-            #body-content {
-                padding-bottom: 10%; /* footer의 높이 */
-            }
-
             footer {
                 width: 100%;
-                height: 10%; /* footer의 높이 */
+                height: 10vh; /* footer의 높이 */
                 position: absolute;
                 bottom: 0;
                 left: 0;
             }
+
+            /* 수직 스크롤바 스타일 */
+            ::-webkit-scrollbar {
+                width: 3px; /* 스크롤바의 너비 */
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background-color: #862B0D; /* 스크롤바의 색상 */
+                border-radius: 5px; /* 스크롤바의 모서리를 둥글게 */
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: darkgrey; /* 스크롤바에 마우스 호버 시 색상 변경 */
+            }
+
         </style>
         <link rel="icon" href="img/logo/favicon.png"/>
         <title>Darts</title>
@@ -104,8 +117,8 @@
 
     <body>
         <div class="col-12 p-3" id="body-wrapper">
-            <section id="body-content" class="col-12 d-flex justify-content-center align-items-center">
-                <div class="col-8">
+            <section class="col-12 d-flex justify-content-center align-items-center">
+                <div class="col-8"  style="height: 90vh;">
                     <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
                         <h4>Raise the score</h4>
                         <div>
@@ -114,14 +127,16 @@
                             <button class="btn funcBtn1" onclick="initializePrevScore()">DEL ⌫</button>
                         </div>
                     </div>
-                    <table id="dartsTable" class="table table-bordered table-hover" style="table-layout: fixed !important;">
-                        <thead>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                    <div style="overflow-y: auto; max-height: 85vh;">
+                        <table id="dartsTable" class="table table-bordered table-hover" style="table-layout: fixed !important;">
+                            <thead>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="col-4 d-flex justify-content-center" id="svg">
+                <div class="col-4 d-flex justify-content-center align-items-center" id="svg" style="height: 90vh;">
                     <svg width="455px" height="455px" viewBox="0 0 455 455" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                             <g id="dartboard">
@@ -253,7 +268,7 @@
                     </svg>
                 </div>
                 <footer class="footer d-flex justify-content-center align-items-center">
-                    <p>Copyright 2023. ELLA. All rights reserved.</p>
+                    <span>Copyright 2023. ELLA. All rights reserved.</span>
                 </footer>
             </section>
         </div>
