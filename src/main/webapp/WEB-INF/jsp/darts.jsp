@@ -45,6 +45,8 @@
                 /*font-size: small;*/
                 text-align: center;
                 border-radius: 0px !important;
+                border-color: transparent;
+                background-color: transparent;
             }
             /*number 우측 증감소 버튼*/
             input[type="number"]::-webkit-outer-spin-button,
@@ -59,6 +61,16 @@
                 outline: none; /* 테두리 제거 */
                 max-width: 100%;
                 font-size: large;
+                text-align: center;
+                font-weight: bold;
+                color: #862B0D;
+            }
+            .grade {
+                border-color: transparent;
+                background-color: transparent;
+                outline: none; /* 테두리 제거 */
+                max-width: 100%;
+                font-size: xx-large;
                 text-align: center;
                 font-weight: bold;
                 color: #862B0D;
@@ -84,8 +96,10 @@
 
             input[type="number"]:focus {
                 outline: none !important;
-                border-color: var(--bs-border-color) !important;
+                /*border-color: var(--bs-border-color) !important;*/
                 box-shadow: 0 0 10px transparent;
+                border-color: transparent;
+                caret-color: transparent;
             }
 
             #body-wrapper {
@@ -133,7 +147,7 @@
                         </div>
                     </div>
                     <div style="overflow-y: auto; max-height: 85vh;">
-                        <table id="dartsTable" class="table table-bordered table-hover" style="table-layout: fixed !important;">
+                        <table id="dartsTable" class="table table-hover" style="table-layout: fixed !important;">
                             <thead>
                             </thead>
                             <tbody>
@@ -435,7 +449,8 @@
                         , "width": ""
                         , "data": null
                         , "render": function(data, type, row) {
-                            return "<input type='text' class='fullTotal' readonly>";
+                            return "<input type='text' class='grade' readonly>" +
+                                "<input type='text' class='fullTotal' readonly>";
                         }
                     }
                 ]
@@ -448,7 +463,6 @@
             dartsTable.draw();
 
             getCenterCoordinates("InnerRed");
-            console.log('>>>' + mX + " / " + mY);
             $("[box-row='1'][box-col='1']").find("[box-detail='1']").focus();
             $("[box-row='1'][box-col='1']").addClass("blink");
         });
@@ -542,6 +556,30 @@
             });
 
             total == 0 ? parentEl.parent().find(".userTotal").find(".fullTotal").val("") : parentEl.parent().find(".userTotal").find(".fullTotal").val(total);
+
+            updateGradeBox();
+        }
+
+        function updateGradeBox() {
+            // 🥇 🥈 🥉
+            let valueList = [];
+            document.querySelectorAll(".fullTotal").forEach((input, index) => {
+                valueList[index] = input.value;
+            });
+            console.log(">>" + valueList);
+            let sortedIndices = valueList
+                .map((_, index) => index) // 인덱스 배열 생성
+                .sort((a, b) => valueList[b] - valueList[a]); // 값을 기준으로 내림차순 정렬된 인덱스 배열
+
+            $(".grade").val("");
+            let medalList = ["🥇", "🥈", "🥉"];
+            for (let i = 0 ; i < 3 ; i++) {
+                if ($('#dartsTable').DataTable().data().count() > i) {
+                    if ($("[box-row='"+(sortedIndices[i]+1)+"']").parent().find(".userTotal").find(".fullTotal").val() != '') {
+                        $("[box-row='"+(sortedIndices[i]+1)+"']").parent().find(".userTotal").find(".grade").val(medalList[i]);
+                    }
+                }
+            }
         }
 
         function getScoreFromXY(x, y, multiple) {
