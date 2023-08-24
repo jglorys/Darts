@@ -708,5 +708,10 @@
             nextTurn.col = prevCol;
             nextTurn.detail = prevDetail;
         }
+
+        // 화면 크기 변경됨
+        window.addEventListener('resize', function() {
+            getCenterCoordinates("InnerRed");
+        });
     </script>
 </html>
