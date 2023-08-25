@@ -9,8 +9,20 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class DartsController {
 
-    @GetMapping("/darts")
+    @GetMapping("/ella/darts")
     public String darts(HttpServletRequest request) {
-        return "darts";
+        return "Darts";
     }
+
+    @GetMapping("/ella/darts/raise")
+    public String raise() {
+        return "RaiseTheScore";
+    }
+
+    @GetMapping("/ella/darts/lowering")
+    public String lowering() {
+        return "LoweringTheScore";
+    }
+
+
 }
