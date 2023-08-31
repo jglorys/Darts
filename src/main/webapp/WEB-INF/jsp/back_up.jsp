@@ -520,24 +520,24 @@
             nextTurn.detail = nextDetail;
         }
 
-        function codeEnterkey() {
-            var focusedElement = document.activeElement;
-            let boxRow = focusedElement.parentElement.getAttribute("box-row");
-            let boxCol = focusedElement.parentElement.getAttribute("box-col");
-            let detail = focusedElement.getAttribute("box-detail");
-            // console.log("R : " + boxRow + " / C : " + boxCol);
-
-            if (window.event.keyCode == 13) {
-                updateFocusTurnNext(boxRow, boxCol, detail);
-            } else {
-                updateTotalBox(boxRow, boxCol);
-                $(".inning").removeClass("blink");
-                nextTurn.row = boxRow;
-                nextTurn.col = boxCol;
-                nextTurn.detail = detail;
-                $("[box-row='"+boxRow+"'][box-col='"+boxCol+"']").addClass("blink");
-            }
-        }
+        // function codeEnterkey() {
+        //     var focusedElement = document.activeElement;
+        //     let boxRow = focusedElement.parentElement.getAttribute("box-row");
+        //     let boxCol = focusedElement.parentElement.getAttribute("box-col");
+        //     let detail = focusedElement.getAttribute("box-detail");
+        //     // console.log("R : " + boxRow + " / C : " + boxCol);
+        //
+        //     if (window.event.keyCode == 13) {
+        //         updateFocusTurnNext(boxRow, boxCol, detail);
+        //     } else {
+        //         updateTotalBox(boxRow, boxCol);
+        //         $(".inning").removeClass("blink");
+        //         nextTurn.row = boxRow;
+        //         nextTurn.col = boxCol;
+        //         nextTurn.detail = detail;
+        //         $("[box-row='"+boxRow+"'][box-col='"+boxCol+"']").addClass("blink");
+        //     }
+        // }
 
         function updateTotalBox(boxRow, boxCol) {
             // inningTotal UPDATE
@@ -570,7 +570,7 @@
             document.querySelectorAll(".fullTotal").forEach((input, index) => {
                 valueList[index] = input.value;
             });
-            console.log(">>" + valueList);
+            // console.log(">>" + valueList);
             let sortedIndices = valueList
                 .map((_, index) => index) // 인덱스 배열 생성
                 .sort((a, b) => valueList[b] - valueList[a]); // 값을 기준으로 내림차순 정렬된 인덱스 배열

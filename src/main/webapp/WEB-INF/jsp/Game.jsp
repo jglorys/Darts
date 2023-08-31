@@ -145,7 +145,12 @@
     <section class="col-12 d-flex justify-content-center align-items-center">
         <div class="col-8"  style="height: 90vh;">
             <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
-                <h4>Lowering the score</h4>
+                <c:if test="${game == 'up'}">
+                    <h4>Raise the score</h4>
+                </c:if>
+                <c:if test="${game == 'down'}">
+                    <h4>Lowering the score (${score})</h4>
+                </c:if>
                 <div>
                     <button class="btn funcBtn1" onclick="reload()">RESET</button>
                     <button class="btn funcBtn1" onclick="addPlayer()">PLAYER +</button>
@@ -314,6 +319,9 @@
         , "detail" : 1
     };
 
+    // down mark
+    let downMark = "😜";
+
     $(document).ready(function(e) {
         dartsTable = $('#dartsTable').DataTable({
             "dom": "t",
@@ -447,14 +455,48 @@
                         $(td).attr("box-col", col);
                     }
                 }
+                <c:if test="${game == 'down'}">
+                    , {
+                        "class": "inning"
+                        , "title": "9"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
+                        }
+                    }
+                    , {
+                        "class": "inning"
+                        , "title": "10"
+                        , "width": ""
+                        , "data": null
+                        , "render": function(data, type, row) {
+                            return inningBoxHtml;
+                        }
+                        ,"createdCell": function(td, cellData, rowData, row, col) {
+                            $(td).attr("box-row", (row+1));
+                            $(td).attr("box-col", col);
+                        }
+                    }
+                </c:if>
                 , {
                     "class": "userTotal"
                     , "title": "TOTAL"
                     , "width": ""
                     , "data": null
                     , "render": function(data, type, row) {
-                        return "<input type='text' class='grade' readonly>" +
-                            "<input type='text' class='fullTotal' readonly>";
+                        <c:if test="${game == 'up'}">
+                            return "<input type='text' class='grade' readonly>" +
+                                "<input type='text' class='fullTotal' readonly>";
+                        </c:if>
+                        <c:if test="${game == 'down'}">
+                            return "<input type='text' class='grade' readonly>" +
+                                "<input type='text' class='fullTotal' value='${score}' readonly>";
+                        </c:if>
                     }
                 }
             ]
@@ -467,24 +509,20 @@
         dartsTable.draw();
 
         getCenterCoordinates("InnerRed");
-        $("[box-row='1'][box-col='1']").find("[box-detail='1']").focus();
+        // $("[box-row='1'][box-col='1']").find("[box-detail='1']").focus();
         $("[box-row='1'][box-col='1']").addClass("blink");
     });
 
     function addPlayer() {
         // 게임 진행중인 경우 추가 불가능
-        let addAble = true;
-        $(".fullTotal").each(function() {
-            if(parseInt($(this).val()) > 0) {
-                alert("Player cannot be added while the game is in progress!");
-                addAble = false;
-                return false;
-            }
-        });
-        if (addAble) {
-            dartsTable.row.add({});
-            dartsTable.draw();
+        if (nextTurn.row != 1 || nextTurn.col != 1 || nextTurn.detail != 1) {
+            alert("Player cannot be added while the game is in progress!");
+            return false;
         }
+
+        dartsTable.row.add({});
+        dartsTable.draw();
+
         getCenterCoordinates("InnerRed");
     }
 
@@ -493,7 +531,7 @@
         location.reload();
     }
 
-    function updateFocusTurnNext(nowRow, nowCol, nowDetail) {
+    function getTurnNext(nowRow, nowCol, nowDetail) {
         let nextRow = nowRow;
         let nextCol = nowCol;
         let nextDetail = parseInt(nowDetail) + 1;
@@ -509,59 +547,58 @@
                 nextDetail = 1;
             }
         }
-        $(".inning").removeClass("blink");
-        $("[box-row='"+nextRow+"'][box-col='"+nextCol+"']").addClass("blink");
-
-        // $("[box-row='"+nowRow+"'][box-col='"+nowCol+"']").find("[box-detail='"+nowDetail+"']").attr("disabled", "true");
-
-        $("[box-row='"+nextRow+"'][box-col='"+nextCol+"']").find("[box-detail='"+nextDetail+"']").focus();
-        nextTurn.row = nextRow;
-        nextTurn.col = nextCol;
-        nextTurn.detail = nextDetail;
+        return {
+            "row" : nextRow
+            , "col" : nextCol
+            , "detail" : nextDetail
+        };
     }
-
-    function codeEnterkey() {
-        var focusedElement = document.activeElement;
-        let boxRow = focusedElement.parentElement.getAttribute("box-row");
-        let boxCol = focusedElement.parentElement.getAttribute("box-col");
-        let detail = focusedElement.getAttribute("box-detail");
-        // console.log("R : " + boxRow + " / C : " + boxCol);
-
-        if (window.event.keyCode == 13) {
-            updateFocusTurnNext(boxRow, boxCol, detail);
-        } else {
-            updateTotalBox(boxRow, boxCol);
-            $(".inning").removeClass("blink");
-            nextTurn.row = boxRow;
-            nextTurn.col = boxCol;
-            nextTurn.detail = detail;
-            $("[box-row='"+boxRow+"'][box-col='"+boxCol+"']").addClass("blink");
-        }
-    }
-
-    function updateTotalBox(boxRow, boxCol) {
-        // inningTotal UPDATE
-        let parentEl = $("[box-row='"+boxRow+"'][box-col='"+boxCol+"']");
-        let sum = 0;
-        for (let i = 1 ; i <= 3 ; i++) {
-            if (parentEl.find("[box-detail='" + i + "']").val() != "") {
-                sum += parseInt(parentEl.find("[box-detail='" + i + "']").val());
+    function getTurnPrev(nowRow, nowCol, nowDetail) {
+        let prevRow = nowRow;
+        let prevCol = nowCol;
+        let prevDetail = parseInt(nowDetail) - 1;
+        if (nowDetail == '1') {
+            // 이전 순서 사람으로 넘어감
+            if (nowRow == 1) {
+                if (nowCol == 1) {
+                    return false;
+                }
+                // 다음 이닝으로 넘어간 상황
+                prevRow = $('#dartsTable').DataTable().data().count();
+                prevCol = prevCol - 1;
+                prevDetail = 3;
+            } else {
+                prevRow = nowRow - 1;
+                prevDetail = 3;
             }
         }
-        sum == 0 ? parentEl.find(".inningTotal").val("") : parentEl.find(".inningTotal").val(sum);
 
-        // Total UPDATE
-        var total = 0;
+        return {
+            "row" : prevRow
+            , "col" : prevCol
+            , "detail" : prevDetail
+        };
+    }
+
+    function getInningTotalBox(boxRow, boxCol) {
+        let sum = 0;
+        for (let i = 1 ; i <= 3 ; i++) {
+            if ($("[box-row='"+boxRow+"'][box-col='"+boxCol+"']").find("[box-detail='" + i + "']").val() != "") {
+                sum += parseInt($("[box-row='"+boxRow+"'][box-col='"+boxCol+"']").find("[box-detail='" + i + "']").val());
+            }
+        }
+        return sum;
+    }
+
+    function getFullTotal(boxRow) {
+        let total = 0;
         $("[box-row='" + boxRow + "']").find(".inningTotal").each(function() {
             var value = parseInt($(this).val()); // input의 값을 숫자로 변환
             if (!isNaN(value)) { // 숫자인 경우에만 합산
                 total += value;
             }
         });
-
-        total == 0 ? parentEl.parent().find(".userTotal").find(".fullTotal").val("") : parentEl.parent().find(".userTotal").find(".fullTotal").val(total);
-
-        updateGradeBox();
+        return total;
     }
 
     function updateGradeBox() {
@@ -570,16 +607,27 @@
         document.querySelectorAll(".fullTotal").forEach((input, index) => {
             valueList[index] = input.value;
         });
-        console.log(">>" + valueList);
-        let sortedIndices = valueList
+        let sortedIndices;
+        let zeroValue;
+        // console.log(">>" + valueList);
+        <c:if test="${game == 'up'}">
+        sortedIndices = valueList
             .map((_, index) => index) // 인덱스 배열 생성
             .sort((a, b) => valueList[b] - valueList[a]); // 값을 기준으로 내림차순 정렬된 인덱스 배열
-
+        zeroValue = "";
+        </c:if>
+        <c:if test="${game == 'down'}">
+        sortedIndices = valueList
+            .map((_, index) => index) // 인덱스 배열 생성
+            .sort((a, b) => valueList[a] - valueList[b]); // 값을 기준으로 오름차순 정렬된 인덱스 배열
+        zeroValue = '${score}';
+        </c:if>
         $(".grade").val("");
+
         let medalList = ["🥇", "🥈", "🥉"];
         for (let i = 0 ; i < 3 ; i++) {
             if ($('#dartsTable').DataTable().data().count() > i) {
-                if ($("[box-row='"+(sortedIndices[i]+1)+"']").parent().find(".userTotal").find(".fullTotal").val() != '') {
+                if ($("[box-row='"+(sortedIndices[i]+1)+"']").parent().find(".userTotal").find(".fullTotal").val() != zeroValue) {
                     $("[box-row='"+(sortedIndices[i]+1)+"']").parent().find(".userTotal").find(".grade").val(medalList[i]);
                 }
             }
@@ -660,8 +708,10 @@
         return result;
     }
 
+    // Main
     $("#svg").on('click', onHandleClick);
     function onHandleClick(event) {
+        // 1. 점수 구하기
         let target = $(event.target);
 
         let x = event.clientX - mX;
@@ -692,20 +742,60 @@
             }
             result = getScoreFromXY(x, y, multiple);
         }
-
-        // console.log("id: " + id + " / parent: " + target.parent().attr("id"));
-        // console.log(">>>>>> x: " + x + " / y: " + y );
-        // console.log(result);
         if (result == NaN) {
             alert("ERROR!\nPlease contact ELLA~,,~");
             return false;
         }
-
-        // 값 넣기
+        // 2. 해당 detail에 값 넣기
         $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val(result);
-        updateTotalBox(nextTurn.row, nextTurn.col);
-        updateFocusTurnNext(nextTurn.row, nextTurn.col, nextTurn.detail);
 
+        // 3. row col에 해당하는 이닝 total box update
+        let inningTotal = getInningTotalBox(nextTurn.row, nextTurn.col);
+        inningTotal == 0
+            ? $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").val("")
+            : $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").val(inningTotal);
+
+        // 4. row에 해당하는 전체 total box 업데이트
+        let fullTotal = getFullTotal(nextTurn.row);
+        if (${game == 'up'}) {
+            fullTotal == 0
+                ? $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val("")
+                : $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(fullTotal);
+        }
+        if (${game == 'down'}) {
+            if (fullTotal == parseInt('${score}')) {
+                alert("🎉GAME OVER🎉");
+            } else if (fullTotal > parseInt('${score}')) {
+                alert(downMark);
+                $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").val(downMark+inningTotal);
+                $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(parseInt('${score}') - getFullTotal(nextTurn.row));
+                let next = getTurnNext(nextTurn.row, nextTurn.col, 3);
+                $(".inning").removeClass("blink");
+                $("[box-row='"+next.row+"'][box-col='"+next.col+"']").addClass("blink");
+                nextTurn.row = next.row;
+                nextTurn.col = next.col;
+                nextTurn.detail = next.detail;
+                updateGradeBox();
+                return false;
+            }
+            fullTotal == 0
+                ? $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(parseInt('${score}'))
+                : $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(parseInt('${score}') - fullTotal);
+
+        }
+
+        // 5. 다음 순서 row,col,detail 가져오기
+        let next = getTurnNext(nextTurn.row, nextTurn.col, nextTurn.detail);
+
+        $(".inning").removeClass("blink");
+        $("[box-row='"+next.row+"'][box-col='"+next.col+"']").addClass("blink");
+        // $("[box-row='"+next.row+"'][box-col='"+next.col+"']").find("[box-detail='"+next.detail+"']").focus();
+        nextTurn.row = next.row;
+        nextTurn.col = next.col;
+        nextTurn.detail = next.detail;
+
+        // 6. 전체 순위 매기기
+        updateGradeBox();
     }
 
     function getCenterCoordinates(elementId) {
@@ -716,39 +806,50 @@
         mY = rect.top + rect.height / 2;
     }
 
+    // DEL 버튼 클릭시 이전 순서 초기화
     function initializePrevScore() {
-        let prevRow = nextTurn.row;
-        let prevCol = nextTurn.col;
-        let prevDetail = parseInt(nextTurn.detail) - 1;
-        if (nextTurn.detail == '1') {
-            // 이전 순서 사람으로 넘어감
-            if (nextTurn.row == 1) {
-                if (nextTurn.col == 1) {
-                    alert("Unable to delete!");
-                    return false;
-                }
-                // 다음 이닝으로 넘어간 상황
-                prevRow = $('#dartsTable').DataTable().data().count();
-                prevCol = prevCol - 1;
-                prevDetail = 3;
-            } else {
-                prevRow = nextTurn.row - 1;
-                prevDetail = 3;
-            }
+        // 1. 이전 순서 칸 구하기
+        let prev = getTurnPrev(nextTurn.row, nextTurn.col, nextTurn.detail);
+        if (!prev) {
+            alert("Unable to delete!");
+            return false;
         }
         $(".inning").removeClass("blink");
-        $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").addClass("blink");
+        $("[box-row='"+prev.row+"'][box-col='"+prev.col+"']").addClass("blink");
+        nextTurn.row = prev.row;
+        nextTurn.col = prev.col;
+        nextTurn.detail = prev.detail;
+        if ($("[box-row='"+prev.row+"'][box-col='"+prev.col+"']").find(".inningTotal").val().indexOf(downMark) == 0) {
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +1+ "']").val("");
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +2+ "']").val("");
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +3+ "']").val("");
+            nextTurn.detail = 1;
+        }
 
-        // $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").find("[box-detail='"+prevDetail+"']").removeAttr("disabled");
-        $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").find("[box-detail='"+prevDetail+"']").val("");
+        // 2. 해당 detail에 값 초기화
+        $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val("");
 
-        $("[box-row='"+prevRow+"'][box-col='"+prevCol+"']").find("[box-detail='"+prevDetail+"']").focus();
+        // 3. row col에 해당하는 이닝 total box update
+        let inningTotal = getInningTotalBox(nextTurn.row, nextTurn.col);
+        inningTotal == 0
+            ? $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").val("")
+            : $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").val(inningTotal);
 
-        updateTotalBox(nextTurn.row, nextTurn.col);
-        updateTotalBox(prevRow, prevCol);
-        nextTurn.row = prevRow;
-        nextTurn.col = prevCol;
-        nextTurn.detail = prevDetail;
+        // 4. row에 해당하는 전체 total box 업데이트
+        let fullTotal = getFullTotal(nextTurn.row);
+        if (${game == 'up'}) {
+            fullTotal == 0
+                ? $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val("")
+                : $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(fullTotal);
+        }
+        if (${game == 'down'}) {
+            fullTotal == 0
+                ? $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(${score})
+                : $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").parent().find(".userTotal").find(".fullTotal").val(${score} - fullTotal);
+        }
+
+        // 5. 전체 순위 매기기
+        updateGradeBox();
     }
 
     // 화면 크기 변경됨
