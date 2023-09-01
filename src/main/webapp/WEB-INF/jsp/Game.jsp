@@ -59,6 +59,9 @@
             border-radius: 0px !important;
             border-color: transparent !important;
             background-color: transparent !important;
+            padding: 0 !important;
+            margin-left: 20%;
+            width: 80%;
         }
         /*number 우측 증감소 버튼*/
         input[type="number"]::-webkit-outer-spin-button,
@@ -135,6 +138,14 @@
             background-color: #B5C99A; /* 스크롤바에 마우스 호버 시 색상 변경 */
         }
 
+        .detailMultiple {
+            font-size: small;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px !important;
+            min-width: 20%;
+        }
     </style>
     <link rel="icon" href="img/logo/favicon.png"/>
     <title>Darts</title>
@@ -302,9 +313,9 @@
 <script>
     let dartsTable;
     let playerName = 'PLAYER ';
-    const inningBoxHtml = "<input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='1' disabled>" +
-        "<input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='2' disabled>" +
-        "<input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='3' disabled>" +
+    const inningBoxHtml = "<div class='d-flex'><input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='1' disabled><div class='detailMultiple'></div></div>" +
+        "<div class='d-flex'><input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='2' disabled><div class='detailMultiple'></div></div>" +
+        "<div class='d-flex'><input type='number' class='form-control inputGrade' onkeyup='codeEnterkey()' box-detail='3' disabled><div class='detailMultiple'></div></div>" +
         "<input type='text' class='inningTotal' readonly>";
     const initialMemberCnt = 3;
 
@@ -748,6 +759,21 @@
         }
         // 2. 해당 detail에 값 넣기
         $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val(result);
+        // 2-1. multipleMark 넣기
+        let multipleMark;
+        if (multiple == 2) {
+            multipleMark = '🔨';
+        }
+        if (multiple == 3) {
+            multipleMark = '⚒️';
+        }
+        if (id == 'InnerGreen' || id == 'InnerRed') {
+            multipleMark = '🔴';
+        }
+        if (result == 0) {
+            multipleMark = '💩';
+        }
+        $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").parent().find(".detailMultiple").text(multipleMark);
 
         // 3. row col에 해당하는 이닝 total box update
         let inningTotal = getInningTotalBox(nextTurn.row, nextTurn.col);
@@ -819,15 +845,21 @@
         nextTurn.row = prev.row;
         nextTurn.col = prev.col;
         nextTurn.detail = prev.detail;
+
+        // 2. 해당 detail에 값 초기화 & multipleMark 초기화
         if ($("[box-row='"+prev.row+"'][box-col='"+prev.col+"']").find(".inningTotal").val().indexOf(downMark) == 0) {
+            // 점수내리기에서 점수 over한 경우
             $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +1+ "']").val("");
             $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +2+ "']").val("");
             $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +3+ "']").val("");
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +1+ "']").parent().find(".detailMultiple").text("");
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +2+ "']").parent().find(".detailMultiple").text("");
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +3+ "']").parent().find(".detailMultiple").text("");
             nextTurn.detail = 1;
+        } else {
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val("");
+            $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").parent().find(".detailMultiple").text("");
         }
-
-        // 2. 해당 detail에 값 초기화
-        $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find("[box-detail='" +nextTurn.detail+ "']").val("");
 
         // 3. row col에 해당하는 이닝 total box update
         let inningTotal = getInningTotalBox(nextTurn.row, nextTurn.col);
