@@ -43,12 +43,19 @@
             color: #ffffff;
             width: 120px;
             border-radius: 0px !important;
+            border: 0px;
         }
 
         .funcBtn1:hover {
             background-color: transparent; /* 원하는 배경색으로 변경 */
             color: #862B0D;
             border-color: transparent; /* 테두리 색 변경 */
+        }
+
+        .funcBtn2 {
+            background-color: transparent;
+            border-radius: 0px !important;
+            border: 0px;
         }
 
         .inputGrade {
@@ -309,6 +316,7 @@
         </footer>
     </section>
 </div>
+
 </body>
 <script>
     let dartsTable;
@@ -332,6 +340,7 @@
 
     // down mark
     let downMark = "😜";
+    let downFinishedInning;
 
     $(document).ready(function(e) {
         dartsTable = $('#dartsTable').DataTable({
@@ -354,11 +363,7 @@
                     , "width": ""
                     , "data": null
                     , "render": function(data, type, row, meta) {
-                        // if (meta.row == 0) {
                         data =  playerName + (meta.row + 1);
-                        // } else {
-                        //     data = playerName + (meta.row + 1) + "<br><button class='btn funcBtn2' onclick='removeRow()'>X</button>";
-                        // }
                         return data;
                     }
                 }
@@ -501,13 +506,15 @@
                     , "data": null
                     , "render": function(data, type, row) {
                         <c:if test="${game == 'up'}">
-                            return "<input type='text' class='grade' readonly>" +
+                            data = "<input type='text' class='grade' readonly>" +
                                 "<input type='text' class='fullTotal' readonly>";
                         </c:if>
                         <c:if test="${game == 'down'}">
-                            return "<input type='text' class='grade' readonly>" +
+                            data = "<input type='text' class='grade' readonly>" +
                                 "<input type='text' class='fullTotal' value='${score}' readonly>";
                         </c:if>
+                        data += "<div class='ableAddGrade' style='display: none'><input type='text' class='form-control nameValue' ><button class='btn funcBtn2'>🌐</button><div>";
+                        return data;
                     }
                 }
             ]
@@ -522,6 +529,12 @@
         getCenterCoordinates("InnerRed");
         // $("[box-row='1'][box-col='1']").find("[box-detail='1']").focus();
         $("[box-row='1'][box-col='1']").addClass("blink");
+
+
+        //test - changeVisibilityForDownAfter5
+        // for (let i = 0 ; i < 70 ; i++) { // ellatest
+        //     $("#outer-1").trigger("click");
+        // }
     });
 
     function addPlayer() {
@@ -791,6 +804,8 @@
         if (${game == 'down'}) {
             if (fullTotal == parseInt('${score}')) {
                 alert("🎉GAME OVER🎉");
+                downFinishedInning = nextTurn.col;
+                checkPossibleAddingScore();
             } else if (fullTotal > parseInt('${score}')) {
                 alert(downMark);
                 $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").val(downMark+inningTotal);
@@ -822,6 +837,17 @@
 
         // 6. 전체 순위 매기기
         updateGradeBox();
+
+        // 7. down & 6이닝부터 가리기
+        // changeVisibilityForDownAfter5('hide');
+
+        // 8. up & 게임 끝남
+        if (${game == 'up'}) {
+            if($("[box-row='"+$('#dartsTable').DataTable().data().count()+"'][box-col='"+8+"']").find("[box-detail='" +3+ "']").val() != "") {
+                alert("🎉GAME OVER🎉");
+                checkPossibleAddingScore();
+            }
+        }
     }
 
     function getCenterCoordinates(elementId) {
@@ -888,5 +914,70 @@
     window.addEventListener('resize', function() {
         getCenterCoordinates("InnerRed");
     });
+
+    // down 게임 & 6이닝부터 경우 점수 가리기
+    function changeVisibilityForDownAfter5(status) {
+        //status : hide || show
+        if (${game == 'down'}) {
+            if(parseInt(nextTurn.col) > 5) {
+                switch (status) {
+                    case "hide":
+                        $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").css('color', 'transparent');
+                        break;
+                    case "show":
+                        $("[box-row='"+nextTurn.row+"'][box-col='"+nextTurn.col+"']").find(".inningTotal").css('color', '#862B0D');
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    // 게임 끝났을 때 점수 등록 모달 띄우기
+    // up : 500점 이상인 경우
+    // down : 0으로 게임 끝난 경우
+    function checkPossibleAddingScore() {
+        if (${game == 'up'}) {
+            document.querySelectorAll(".fullTotal").forEach((input, index) => {
+                if (parseInt(input.value) >= 500) {
+                    $("[box-row='"+(index+1)+"']").parent().find(".userTotal").find(".ableAddGrade").css("display", "");
+                }
+            });
+        }
+        if (${game == 'down'}) {
+            $("[box-row='"+nextTurn.row+"']").parent().find(".userTotal").find(".ableAddGrade").css("display", "");
+        }
+    }
+
+    $(document).on("click", ".funcBtn2", function(e) {
+        let closingDiv = $(this).parent();
+        $.ajax({
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            url: "${pageContext.request.contextPath}/api/saveGrade",
+            type: "POST",
+            cache: false,
+            dataType: "JSON",
+            data: {
+                game : "${game}"
+                , name : $(this).parent().find(".nameValue").val()
+                , inning : ${game == 'up'} ? 0 : downFinishedInning
+                , score : ${game == 'up'} ? $(this).parent().parent().find(".fullTotal").val() : "${score}"
+            },
+            async: false,
+            success: function(result) {
+                if (result.result == 'success') {
+                    closingDiv.css("display", "none");
+                } else {
+                    alert("ERROR!\nPlease contact ELLA~,,~");
+                }
+            },
+            error: function(request, status, error) {
+                var msg = "ERROR : " + request.status + "<br> 내용 : " + request.responseText + "<br>" + error;
+                console.log(msg);
+            }
+        }); // ajax
+    });
+
 </script>
 </html>
