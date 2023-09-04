@@ -44,5 +44,11 @@ public class DartsController {
         return "Game";
     }
 
+    @GetMapping("/ella/rank")
+    public String rank(Model model, @RequestParam String game) {
+        model.addAttribute("game", game);
+        return "Rank";
+    }
+
 
 }

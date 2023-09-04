@@ -35,6 +35,7 @@
             border-radius: 0px !important;
             transition: all 0.2s linear;
             margin: 30px;
+            border: transparent;
         }
         .upHoverBtn {
             display: none;
@@ -43,7 +44,7 @@
             background-color: #FFC95F; /* 원하는 배경색으로 변경 */
             color: #862B0D;
             border-color: transparent; /* 테두리 색 변경 */
-            transform: scale(1.4);
+            transform: scale(1.2);
         }
         .upHoverBtn {
             border-color: #862B0D;
@@ -60,17 +61,27 @@
 <div class="col-12 p-3" id="body-wrapper">
     <section class="col-12 d-flex justify-content-center align-items-center">
         <div class="col-8 d-flex justify-content-around align-items-center" style="height: 90vh;">
-            <div class="btn funcBtn1 d-flex align-items-center justify-content-center" onclick="movePage(0)">
-                <span>RAISE<br>THE<br>SCORE</span>
+            <div>
+                <div class="btn funcBtn1 d-flex align-items-center justify-content-center" onclick="gamePage(0)">
+                    <span>RAISE<br>THE<br>SCORE</span>
+                </div>
+                <div class="btn funcBtn1 d-flex align-items-center justify-content-center" style="height: 10vh !important;" onclick="gradePage('up')">
+                    <span>RAISE<br>RANKING</span>
+                </div>
             </div>
-            <div id="loweringBtn" class="btn funcBtn1 d-flex align-items-center justify-content-center">
-                <div>
-                    <span>LOWERING<br>THE<br>SCORE</span>
-                    <div class="d-flex justify-content-center align-items-center mt-4">
-                        <button class="btn upHoverBtn" onclick="movePage(301)" >301</button>
-                        <button class="btn upHoverBtn" onclick="movePage(401)" >401</button>
-                        <button class="btn upHoverBtn" onclick="movePage(501)" >501</button>
+            <div>
+                <div id="loweringBtn" class="btn funcBtn1 d-flex align-items-center justify-content-center">
+                    <div>
+                        <span>LOWERING<br>THE<br>SCORE</span>
+                        <div class="d-flex justify-content-center align-items-center mt-4">
+                            <button class="btn upHoverBtn" onclick="gamePage(301)" >301</button>
+                            <button class="btn upHoverBtn" onclick="gamePage(401)" >401</button>
+                            <button class="btn upHoverBtn" onclick="gamePage(501)" >501</button>
+                        </div>
                     </div>
+                </div>
+                <div class="btn funcBtn1 d-flex align-items-center justify-content-center" style="height: 10vh !important;" onclick="gradePage('down')">
+                    <span>LOWERING<br>RANKING</span>
                 </div>
             </div>
 
@@ -82,13 +93,17 @@
 </div>
 </body>
 <script>
-    function movePage(score) {
+    function gamePage(score) {
         if (score == 0) {
             location.href = '${pageContext.request.contextPath}/ella/darts/raise';
         } else {
             location.href = '${pageContext.request.contextPath}/ella/darts/lowering?score=' + score;
         }
     }
+    function gradePage(game) {
+        location.href = '${pageContext.request.contextPath}/ella/rank?game=' + game;
+    }
+
     $("#loweringBtn").on('mouseover', function(){
         $(".upHoverBtn").css('display', 'block');
     });

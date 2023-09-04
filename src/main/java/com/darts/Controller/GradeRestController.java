@@ -22,8 +22,8 @@ public class GradeRestController {
     @Autowired
     RaiseGradeService raiseGradeService;
 
-    @PostMapping("/api/saveGrade")
-    public Map<String, Object> saveGrade(HttpServletRequest request) {
+    @PostMapping("/api/saveRank")
+    public Map<String, Object> saveRank(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -58,16 +58,19 @@ public class GradeRestController {
         return result;
     }
 
-    @PostMapping("/api/getGradeList")
-    public List<Map> getGradeList(@RequestBody Map<String, Object> request) {
+    @PostMapping("/api/getRankList")
+    public List<Map> getRankList(HttpServletRequest request) {
         List<Map> result = new ArrayList<>();
         try {
-            String game = request.get("game").toString();
+            String game = request.getParameter("game");
             if (game.equals("up")) {
                 result = raiseGradeService.findAll();
+                result.sort(Comparator.comparing(m -> (Integer) m.get("score"), Comparator.reverseOrder())); // score desc
             }
             if (game.equals("down")) {
                 result = loweringGradeService.findAll();
+                result.sort(Comparator.comparing(m -> (Integer) m.get("score"), Comparator.reverseOrder())); // score desc
+                result.sort(Comparator.comparing(m -> (Integer) m.get("inning"))); // inning asc
             }
         } catch(Exception e) {
             e.printStackTrace();

@@ -954,7 +954,7 @@
         let closingDiv = $(this).parent();
         $.ajax({
             contentType: "application/x-www-form-urlencoded; charset=utf-8",
-            url: "${pageContext.request.contextPath}/api/saveGrade",
+            url: "${pageContext.request.contextPath}/api/saveRank",
             type: "POST",
             cache: false,
             dataType: "JSON",
