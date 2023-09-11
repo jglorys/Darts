@@ -161,8 +161,8 @@
 <body>
 <div class="col-12 p-3" id="body-wrapper">
     <section class="col-12 d-flex justify-content-center align-items-center" style="height: 90vh;">
-        <div>
-            <div class="d-flex justify-content-start align-items-start" style="height: 10vh;">
+        <div style="height: 100%">
+            <div class="d-flex justify-content-start align-items-start" style="height: 5vh;">
                 <c:if test="${game == 'up'}">
                     <h4>Raise Ranking</h4>
                 </c:if>
